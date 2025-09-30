@@ -1,103 +1,183 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [jobRole, setJobRole] = useState('');
+  const [company, setCompany] = useState('');
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [currentStep, setCurrentStep] = useState<'input' | 'questions' | 'mock'>('input');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const handleGenerateQuestions = async () => {
+    if (!jobRole.trim() || !company.trim()) {
+      setError('Please fill both fields');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/generate-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobRole, company }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate questions');
+      }
+
+      const data = await response.json();
+      setQuestions(data.questions || []);
+      setCurrentStep('questions');
+    } catch (err) {
+      setError('Failed to generate questions. Please try again.');
+      console.error('Error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const startMockInterview = () => {
+    setCurrentStep('mock');
+  };
+
+  const resetToHome = () => {
+    setCurrentStep('input');
+    setQuestions([]);
+    setJobRole('');
+    setCompany('');
+    setError('');
+  };
+
+  return (
+    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl mx-auto">
+        
+        {/* Input Screen */}
+        {currentStep === 'input' && (
+          <div className="text-center space-y-8">
+            {/* Header */}
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold text-[var(--foreground)]">
+                PrepForge
+              </h1>
+              <p className="text-lg text-gray-600">
+                Generate personalized questions and practice with AI feedback
+              </p>
+            </div>
+
+            {/* Input Form */}
+            <div className="space-y-6 max-w-md mx-auto">
+              <div>
+                <input
+                  type="text"
+                  placeholder="e.g., Software Engineer"
+                  value={jobRole}
+                  onChange={(e) => setJobRole(e.target.value)}
+                  className="w-full px-0 py-3 text-lg bg-transparent border-0 border-b-2 border-[var(--border)] focus:border-[var(--accent)] focus:outline-none transition-colors"
+                />
+              </div>
+              
+              <div>
+                <input
+                  type="text"
+                  placeholder="e.g., Google"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="w-full px-0 py-3 text-lg bg-transparent border-0 border-b-2 border-[var(--border)] focus:border-[var(--accent)] focus:outline-none transition-colors"
+                />
+              </div>
+
+              <button
+                onClick={handleGenerateQuestions}
+                disabled={isLoading || (!jobRole.trim() || !company.trim())}
+                className="w-full py-4 px-6 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-lg"
+              >
+                {isLoading ? 'Generating Questions...' : 'Generate Questions'}
+              </button>
+
+              {error && (
+                <p className="text-red-500 text-sm mt-2 transition-opacity">
+                  {error}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Questions Display Screen */}
+        {currentStep === 'questions' && (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-[var(--foreground)] mb-6">
+                Your Generated Questions
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {questions.map((question, index) => (
+                <div key={index} className="py-4 px-0 border-b border-[var(--border)] last:border-b-0">
+                  <p className="text-lg text-[var(--foreground)]">
+                    {index + 1}. {question}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={startMockInterview}
+                className="py-3 px-8 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-medium rounded-lg transition-colors"
+              >
+                Start Mock Interview
+              </button>
+              <button
+                onClick={resetToHome}
+                className="py-3 px-8 text-gray-600 hover:text-[var(--foreground)] transition-colors"
+              >
+                Regenerate
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mock Interview Mode */}
+        {currentStep === 'mock' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-gray-500">Question 1 of {questions.length}</p>
+              <button
+                onClick={resetToHome}
+                className="text-sm text-gray-500 hover:text-[var(--foreground)] transition-colors"
+              >
+                End Mock
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold text-[var(--foreground)] mb-4">
+                  Question 1: {questions[0]}
+                </h3>
+                <textarea
+                  placeholder="Type your answer here..."
+                  className="w-full h-40 p-4 bg-[var(--muted)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
+                />
+              </div>
+
+              <button className="w-full py-3 px-6 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-medium rounded-lg transition-colors">
+                Submit Answer
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
