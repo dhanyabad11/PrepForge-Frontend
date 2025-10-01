@@ -1,60 +1,307 @@
 @import "tailwindcss";
 
 :root {
-  /* Minimalist Color Palette */
-  --background: #ffffff;
-  --foreground: #333333;
-  --muted: #f5f5f5;
-  --border: #e0e0e0;
-  --accent: #007bff;
-  --accent-hover: #0056b3;
+    /* Minimalist Color Palette - Neutral Gray with Soft Blue Accent (60-30-10 Rule) */
+
+    /* Primary Background (60% usage) - Off-White for spacious, airy canvas */
+    --background: #f5f5f5; /* Off-White - main background */
+    --background-pure: #ffffff; /* Pure White - cards and content areas */
+
+    /* Secondary Neutrals (30% usage) - Structure and text */
+    --foreground: #333333; /* Dark Gray - headings and primary text */
+    --muted: #e0e0e0; /* Light Gray - subtle elements, borders, input fields */
+    --border: #e0e0e0; /* Light Gray - dividers and borders */
+    --text-secondary: #666666; /* Medium Gray - secondary text */
+    --text-muted: #999999; /* Light Gray - placeholders and subtle text */
+    --input-bg: #fafafa; /* Very light gray - input backgrounds */
+
+    /* Accent Color (10% usage) - Soft Blue for CTAs and highlights */
+    --accent: #007bff; /* Soft Blue - primary buttons and focus states */
+    --accent-hover: #0056b3; /* Darker Blue - hover states */
+    --accent-muted: #5a9bd3; /* Muted Blue - alternative accent */
+    --accent-light: rgba(0, 123, 255, 0.1); /* Light blue for backgrounds */
+
+    /* Subtle shadows and effects */
+    --shadow-subtle: rgba(0, 0, 0, 0.05);
+    --shadow-soft: rgba(0, 0, 0, 0.08);
 }
 
+/* Dark mode (2025 trend - swap to #121212 black background) */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #121212;
-    --foreground: #ededed;
-    --muted: #1a1a1a;
-    --border: #333333;
-    --accent: #5a9bd3;
-    --accent-hover: #4a8bc2;
-  }
+    :root {
+        --background: #121212; /* Dark background */
+        --background-pure: #1e1e1e; /* Slightly lighter for cards */
+        --foreground: #e0e0e0; /* Light text */
+        --muted: #2a2a2a; /* Dark gray for subtle elements */
+        --border: #333333; /* Darker borders */
+        --text-secondary: #b0b0b0; /* Medium light gray */
+        --text-muted: #808080; /* Muted gray */
+        --input-bg: #1a1a1a; /* Dark input background */
+        --accent: #4a9eff; /* Brighter blue for dark mode */
+        --accent-hover: #6bb6ff; /* Lighter hover */
+        --accent-muted: #5a9bd3; /* Same muted blue works in dark */
+        --accent-light: rgba(74, 158, 255, 0.15);
+        --shadow-subtle: rgba(255, 255, 255, 0.05);
+        --shadow-soft: rgba(255, 255, 255, 0.08);
+    }
 }
 
 * {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
 }
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  line-height: 1.6;
-  font-size: 16px;
+    /* 60% usage - Primary background */
+    background: var(--background);
+    color: var(--foreground);
+
+    /* Sans-serif fonts for readability (minimalist requirement) */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+        "Cantarell", "Open Sans", "Helvetica Neue", sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+
+    /* Smooth transitions for professional feel */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Typography - Clean and minimal */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--foreground);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+}
+
+p {
+    color: var(--foreground);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Secondary text styling */
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.text-muted {
+    color: var(--text-muted);
 }
 
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
-  width: 8px;
+    width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--muted);
+    background: var(--muted);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+    background: var(--border);
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+    background: var(--foreground);
+}
+
+/* Smooth transitions and animations */
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus states for better accessibility */
+input:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+/* Subtle shadows for depth */
+.shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Input styles - Borderless with subtle underlines (minimalist requirement) */
+input[type="text"],
+input[type="email"],
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: var(--foreground);
+    background: var(--input-bg);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+    border-bottom-color: var(--accent);
+    background: var(--background-pure);
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* Button styles - Soft blue accent (10% usage rule) */
+.btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-subtle);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    box-shadow: var(--shadow-soft);
+    transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+    background: var(--muted);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Secondary button (minimal styling) */
+.btn-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    color: var(--foreground);
+}
+
+/* Card styles for content areas */
+.card {
+    background: var(--background-pure);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-subtle);
+    border: 1px solid var(--border);
+}
+
+/* Minimalist question list styling */
+.question-item {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.question-item:last-child {
+    border-bottom: none;
+}
+
+.question-number {
+    background: var(--muted);
+    color: var(--text-secondary);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+/* Feedback box styling */
+.feedback-box {
+    background: var(--accent-light);
+    border: 1px solid var(--accent-muted);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.feedback-label {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+/* Loading states */
+.loading-spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Smooth loading spinner */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive spacing for mobile */
+@media (max-width: 768px) {
+    .card {
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+    }
+
+    .question-item {
+        padding: 1rem 0;
+    }
 }

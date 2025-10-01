@@ -1,183 +1,457 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
+import UserMenu from "@/components/UserMenu";
 
 export default function Home() {
-  const [jobRole, setJobRole] = useState('');
-  const [company, setCompany] = useState('');
-  const [questions, setQuestions] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [currentStep, setCurrentStep] = useState<'input' | 'questions' | 'mock'>('input');
+    const [jobRole, setJobRole] = useState("");
+    const [company, setCompany] = useState("");
+    const [questions, setQuestions] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [currentStep, setCurrentStep] = useState<"input" | "questions" | "mock" | "complete">(
+        "input"
+    );
 
-  const handleGenerateQuestions = async () => {
-    if (!jobRole.trim() || !company.trim()) {
-      setError('Please fill both fields');
-      return;
-    }
+    // Mock interview state
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [currentAnswer, setCurrentAnswer] = useState("");
+    const [feedback, setFeedback] = useState("");
+    const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
+    const [showFeedback, setShowFeedback] = useState(false);
 
-    setIsLoading(true);
-    setError('');
+    const handleGenerateQuestions = async () => {
+        if (!jobRole.trim() || !company.trim()) {
+            setError("Please fill both fields");
+            return;
+        }
 
-    try {
-      const response = await fetch('/api/generate-questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ jobRole, company }),
-      });
+        setIsLoading(true);
+        setError("");
 
-      if (!response.ok) {
-        throw new Error('Failed to generate questions');
-      }
+        try {
+            const response = await fetch("/api/generate-questions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ jobRole, company }),
+            });
 
-      const data = await response.json();
-      setQuestions(data.questions || []);
-      setCurrentStep('questions');
-    } catch (err) {
-      setError('Failed to generate questions. Please try again.');
-      console.error('Error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+            if (!response.ok) {
+                throw new Error("Failed to generate questions");
+            }
 
-  const startMockInterview = () => {
-    setCurrentStep('mock');
-  };
+            const data = await response.json();
+            setQuestions(data.questions || []);
+            setCurrentStep("questions");
+        } catch (err) {
+            setError("Failed to generate questions. Please try again.");
+            console.error("Error:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  const resetToHome = () => {
-    setCurrentStep('input');
-    setQuestions([]);
-    setJobRole('');
-    setCompany('');
-    setError('');
-  };
+    const startMockInterview = () => {
+        setCurrentStep("mock");
+        setCurrentQuestionIndex(0);
+        setCurrentAnswer("");
+        setFeedback("");
+        setShowFeedback(false);
+    };
 
-  return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl mx-auto">
-        
-        {/* Input Screen */}
-        {currentStep === 'input' && (
-          <div className="text-center space-y-8">
-            {/* Header */}
-            <div className="space-y-4">
-              <h1 className="text-4xl font-bold text-[var(--foreground)]">
-                PrepForge
-              </h1>
-              <p className="text-lg text-gray-600">
-                Generate personalized questions and practice with AI feedback
-              </p>
+    const submitAnswer = async () => {
+        if (!currentAnswer.trim()) {
+            setError("Please provide an answer before submitting");
+            return;
+        }
+
+        setIsSubmittingAnswer(true);
+        setError("");
+
+        try {
+            const response = await fetch("/api/generate-feedback", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    question: questions[currentQuestionIndex],
+                    answer: currentAnswer,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to get feedback");
+            }
+
+            const data = await response.json();
+            setFeedback(data.feedback || "Good response! Keep practicing to improve further.");
+            setShowFeedback(true);
+        } catch (err) {
+            setError("Failed to get feedback. Please try again.");
+            console.error("Error:", err);
+        } finally {
+            setIsSubmittingAnswer(false);
+        }
+    };
+
+    const nextQuestion = () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+            setCurrentAnswer("");
+            setFeedback("");
+            setShowFeedback(false);
+            setError("");
+        } else {
+            // Interview complete
+            setCurrentStep("complete");
+        }
+    };
+
+    const resetToHome = () => {
+        setCurrentStep("input");
+        setQuestions([]);
+        setJobRole("");
+        setCompany("");
+        setError("");
+        setCurrentQuestionIndex(0);
+        setCurrentAnswer("");
+        setFeedback("");
+        setShowFeedback(false);
+    };
+
+    return (
+        <div style={{ background: "var(--background)" }}>
+            {/* Top Navigation */}
+            <div className="absolute top-0 right-0 p-6 z-10">
+                <UserMenu />
             </div>
 
-            {/* Input Form */}
-            <div className="space-y-6 max-w-md mx-auto">
-              <div>
-                <input
-                  type="text"
-                  placeholder="e.g., Software Engineer"
-                  value={jobRole}
-                  onChange={(e) => setJobRole(e.target.value)}
-                  className="w-full px-0 py-3 text-lg bg-transparent border-0 border-b-2 border-[var(--border)] focus:border-[var(--accent)] focus:outline-none transition-colors"
-                />
-              </div>
-              
-              <div>
-                <input
-                  type="text"
-                  placeholder="e.g., Google"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                  className="w-full px-0 py-3 text-lg bg-transparent border-0 border-b-2 border-[var(--border)] focus:border-[var(--accent)] focus:outline-none transition-colors"
-                />
-              </div>
+            <div className="min-h-screen flex items-center justify-center p-4">
+                <div className="w-full max-w-4xl mx-auto">
+                    {/* Input Screen */}
+                    {currentStep === "input" && (
+                        <div className="min-h-screen flex flex-col justify-center items-center px-4 animate-fadeIn">
+                            {/* Header */}
+                            <div className="text-center space-y-6 mb-12">
+                                <h1
+                                    className="text-6xl font-bold"
+                                    style={{ color: "var(--foreground)" }}
+                                >
+                                    PrepForge
+                                </h1>
+                                <p
+                                    className="text-xl font-light"
+                                    style={{ color: "var(--text-secondary)" }}
+                                >
+                                    Generate personalized questions and practice with AI feedback
+                                </p>
+                            </div>
 
-              <button
-                onClick={handleGenerateQuestions}
-                disabled={isLoading || (!jobRole.trim() || !company.trim())}
-                className="w-full py-4 px-6 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-lg"
-              >
-                {isLoading ? 'Generating Questions...' : 'Generate Questions'}
-              </button>
+                            {/* Input Form - Card with Pure White Background (60% rule) */}
+                            <div className="card w-full max-w-lg">
+                                <div className="space-y-8">
+                                    <div className="space-y-3">
+                                        <label
+                                            className="block text-sm font-medium"
+                                            style={{ color: "var(--text-secondary)" }}
+                                        >
+                                            Job Role
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g., Software Engineer"
+                                            value={jobRole}
+                                            onChange={(e) => setJobRole(e.target.value)}
+                                            className="w-full text-lg bg-transparent border-0 border-b-2 px-0 py-3"
+                                            style={{
+                                                borderBottomColor: "var(--border)",
+                                                color: "var(--foreground)",
+                                            }}
+                                            onFocus={(e) =>
+                                                (e.target.style.borderBottomColor = "var(--accent)")
+                                            }
+                                            onBlur={(e) =>
+                                                (e.target.style.borderBottomColor = "var(--border)")
+                                            }
+                                        />
+                                    </div>
 
-              {error && (
-                <p className="text-red-500 text-sm mt-2 transition-opacity">
-                  {error}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
+                                    <div className="space-y-3">
+                                        <label
+                                            className="block text-sm font-medium"
+                                            style={{ color: "var(--text-secondary)" }}
+                                        >
+                                            Company
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g., Google"
+                                            value={company}
+                                            onChange={(e) => setCompany(e.target.value)}
+                                            className="w-full text-lg bg-transparent border-0 border-b-2 px-0 py-3"
+                                            style={{
+                                                borderBottomColor: "var(--border)",
+                                                color: "var(--foreground)",
+                                            }}
+                                            onFocus={(e) =>
+                                                (e.target.style.borderBottomColor = "var(--accent)")
+                                            }
+                                            onBlur={(e) =>
+                                                (e.target.style.borderBottomColor = "var(--border)")
+                                            }
+                                        />
+                                    </div>
 
-        {/* Questions Display Screen */}
-        {currentStep === 'questions' && (
-          <div className="space-y-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-[var(--foreground)] mb-6">
-                Your Generated Questions
-              </h2>
-            </div>
+                                    <div className="pt-6">
+                                        <button
+                                            onClick={handleGenerateQuestions}
+                                            disabled={
+                                                isLoading || !jobRole.trim() || !company.trim()
+                                            }
+                                            className="btn-primary w-full text-lg py-4"
+                                        >
+                                            {isLoading ? (
+                                                <span className="flex items-center justify-center space-x-2">
+                                                    <div className="loading-spinner"></div>
+                                                    <span>Generating Questions...</span>
+                                                </span>
+                                            ) : (
+                                                "Generate Questions"
+                                            )}
+                                        </button>
+                                    </div>
 
-            <div className="space-y-4">
-              {questions.map((question, index) => (
-                <div key={index} className="py-4 px-0 border-b border-[var(--border)] last:border-b-0">
-                  <p className="text-lg text-[var(--foreground)]">
-                    {index + 1}. {question}
-                  </p>
+                                    {error && (
+                                        <p className="text-red-500 text-sm text-center transition-all duration-300">
+                                            {error}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Questions Display Screen */}
+                    {currentStep === "questions" && (
+                        <div className="space-y-8 animate-fadeIn">
+                            <div className="text-center">
+                                <h2
+                                    className="text-3xl font-light mb-12"
+                                    style={{ color: "var(--foreground)" }}
+                                >
+                                    Your Interview Questions
+                                </h2>
+                            </div>
+
+                            <div className="space-y-4 max-w-4xl mx-auto">
+                                {questions.map((question, index) => (
+                                    <div key={index} className="card">
+                                        <div className="flex items-start space-x-4">
+                                            <div
+                                                className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white"
+                                                style={{ backgroundColor: "var(--accent)" }}
+                                            >
+                                                {index + 1}
+                                            </div>
+                                            <div className="flex-1">
+                                                <p
+                                                    className="text-lg leading-relaxed"
+                                                    style={{ color: "var(--foreground)" }}
+                                                >
+                                                    {question}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-16">
+                                <button onClick={resetToHome} className="btn-secondary px-8 py-3">
+                                    Generate New Questions
+                                </button>
+                                <button
+                                    onClick={startMockInterview}
+                                    className="btn-primary px-8 py-3"
+                                >
+                                    Start Mock Interview
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Mock Interview Mode */}
+                    {currentStep === "mock" && (
+                        <div className="space-y-8 animate-fadeIn max-w-4xl mx-auto">
+                            <div className="flex justify-between items-center">
+                                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                                    Question {currentQuestionIndex + 1} of {questions.length}
+                                </p>
+                                <button
+                                    onClick={resetToHome}
+                                    className="text-sm hover:underline"
+                                    style={{ color: "var(--text-secondary)" }}
+                                >
+                                    End Mock
+                                </button>
+                            </div>
+
+                            <div className="card">
+                                <div className="space-y-8">
+                                    <div>
+                                        <h3
+                                            className="text-2xl font-light mb-8 leading-relaxed"
+                                            style={{ color: "var(--foreground)" }}
+                                        >
+                                            <span
+                                                className="font-medium"
+                                                style={{ color: "var(--accent)" }}
+                                            >
+                                                Question {currentQuestionIndex + 1}:
+                                            </span>
+                                            <br />
+                                            <br />
+                                            {questions[currentQuestionIndex]}
+                                        </h3>
+                                    </div>
+                                    <div className="relative">
+                                        <textarea
+                                            value={currentAnswer}
+                                            onChange={(e) => setCurrentAnswer(e.target.value)}
+                                            placeholder="Type your answer here..."
+                                            className="w-full min-h-[150px] p-0 border-0 border-b-2 text-base leading-relaxed resize-none"
+                                            style={{
+                                                backgroundColor: "transparent",
+                                                borderBottomColor: "var(--border)",
+                                                color: "var(--foreground)",
+                                                outline: "none",
+                                            }}
+                                            onFocus={(e) =>
+                                                (e.target.style.borderBottomColor = "var(--accent)")
+                                            }
+                                            onBlur={(e) =>
+                                                (e.target.style.borderBottomColor = "var(--border)")
+                                            }
+                                            onInput={(e) => {
+                                                const target = e.target as HTMLTextAreaElement;
+                                                target.style.height = "auto";
+                                                target.style.height =
+                                                    Math.max(150, target.scrollHeight) + "px";
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {!showFeedback ? (
+                                <button
+                                    onClick={submitAnswer}
+                                    disabled={isSubmittingAnswer || !currentAnswer.trim()}
+                                    className="btn-primary w-full py-4"
+                                >
+                                    {isSubmittingAnswer ? (
+                                        <span className="flex items-center justify-center space-x-2">
+                                            <div className="loading-spinner"></div>
+                                            <span>Thinking...</span>
+                                        </span>
+                                    ) : (
+                                        "Submit Answer"
+                                    )}
+                                </button>
+                            ) : (
+                                <div className="space-y-6 animate-fadeIn">
+                                    <div
+                                        className="card"
+                                        style={{ backgroundColor: "var(--muted)" }}
+                                    >
+                                        <h4
+                                            className="font-medium mb-4 text-sm uppercase tracking-wide"
+                                            style={{ color: "var(--text-secondary)" }}
+                                        >
+                                            AI Feedback:
+                                        </h4>
+                                        <p
+                                            className="leading-relaxed text-base"
+                                            style={{ color: "var(--foreground)" }}
+                                        >
+                                            {feedback}
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        onClick={nextQuestion}
+                                        className="btn-primary w-full py-4"
+                                    >
+                                        {currentQuestionIndex < questions.length - 1
+                                            ? `Next Question →`
+                                            : "Complete Interview ✓"}
+                                    </button>
+                                </div>
+                            )}
+
+                            {error && (
+                                <p className="text-red-500 text-sm mt-4 text-center">{error}</p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Interview Complete Screen */}
+                    {currentStep === "complete" && (
+                        <div className="text-center space-y-12 animate-fadeIn max-w-2xl mx-auto">
+                            <div className="space-y-6">
+                                <div
+                                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto"
+                                    style={{ backgroundColor: "var(--accent)" }}
+                                >
+                                    <svg
+                                        className="w-10 h-10 text-white"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                </div>
+                                <h2
+                                    className="text-3xl font-light"
+                                    style={{ color: "var(--foreground)" }}
+                                >
+                                    Mock Interview Complete! 🎉
+                                </h2>
+                                <p
+                                    className="text-lg leading-relaxed"
+                                    style={{ color: "var(--text-secondary)" }}
+                                >
+                                    Great job! You&apos;ve successfully completed {questions.length}{" "}
+                                    interview questions. Keep practicing to improve your interview
+                                    skills.
+                                </p>
+                            </div>
+
+                            <div className="space-y-6">
+                                <button
+                                    onClick={resetToHome}
+                                    className="btn-primary px-12 py-4 text-lg"
+                                >
+                                    Start New Interview
+                                </button>
+
+                                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                                    Ready for another round of practice?
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
-              ))}
             </div>
-
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={startMockInterview}
-                className="py-3 px-8 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-medium rounded-lg transition-colors"
-              >
-                Start Mock Interview
-              </button>
-              <button
-                onClick={resetToHome}
-                className="py-3 px-8 text-gray-600 hover:text-[var(--foreground)] transition-colors"
-              >
-                Regenerate
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Mock Interview Mode */}
-        {currentStep === 'mock' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-500">Question 1 of {questions.length}</p>
-              <button
-                onClick={resetToHome}
-                className="text-sm text-gray-500 hover:text-[var(--foreground)] transition-colors"
-              >
-                End Mock
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold text-[var(--foreground)] mb-4">
-                  Question 1: {questions[0]}
-                </h3>
-                <textarea
-                  placeholder="Type your answer here..."
-                  className="w-full h-40 p-4 bg-[var(--muted)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
-                />
-              </div>
-
-              <button className="w-full py-3 px-6 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-medium rounded-lg transition-colors">
-                Submit Answer
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

@@ -2,23 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
     try {
-        const { jobRole, company } = await request.json();
+        const { question, answer } = await request.json();
 
-        if (!jobRole || !company) {
+        if (!question || !answer) {
             return NextResponse.json(
-                { error: "Job role and company are required" },
+                { error: "Question and answer are required" },
                 { status: 400 }
             );
         }
 
         // Call the backend API
         const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
-        const response = await fetch(`${backendUrl}/api/generate-questions`, {
+        const response = await fetch(`${backendUrl}/api/generate-feedback`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ jobRole, company }),
+            body: JSON.stringify({ question, answer }),
         });
 
         if (!response.ok) {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {
-        console.error("Error generating questions:", error);
-        return NextResponse.json({ error: "Failed to generate questions" }, { status: 500 });
+        console.error("Error generating feedback:", error);
+        return NextResponse.json({ error: "Failed to generate feedback" }, { status: 500 });
     }
 }
