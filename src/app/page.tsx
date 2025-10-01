@@ -1,17 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import UserMenu from "@/components/UserMenu";
 
+interface Question {
+    id: string;
+    question: string;
+    type: "behavioral" | "technical" | "situational";
+    difficulty: "easy" | "medium" | "hard";
+    category: string;
+}
+
 export default function Home() {
+    const { data: session } = useSession();
     const [jobRole, setJobRole] = useState("");
     const [company, setCompany] = useState("");
-    const [questions, setQuestions] = useState<string[]>([]);
+    const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [currentStep, setCurrentStep] = useState<"input" | "questions" | "mock" | "complete">(
         "input"
     );
+    const [, setSavedQuestionSetId] = useState<string | null>(null);
 
     // Mock interview state
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -30,12 +41,49 @@ export default function Home() {
         setError("");
 
         try {
-            const response = await fetch("/api/generate-questions", {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+
+            // First, register/update user if authenticated
+            if (session?.user) {
+                await fetch(`${backendUrl}/api/db/auth/user`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-user-email": session.user.email || "",
+                        "x-user-name": session.user.name || "",
+                        "x-user-image": session.user.image || "",
+                    },
+                    body: JSON.stringify({
+                        email: session.user.email,
+                        name: session.user.name,
+                        image: session.user.image,
+                        googleId: session.user.email, // Using email as googleId for now
+                    }),
+                });
+            }
+
+            // Generate questions with database integration if authenticated
+            const endpoint = session?.user
+                ? `${backendUrl}/api/db/generate-questions`
+                : `${backendUrl}/api/generate-questions`;
+            const headers: Record<string, string> = {
+                "Content-Type": "application/json",
+            };
+
+            if (session?.user) {
+                headers["x-user-email"] = session.user.email || "";
+                headers["x-user-name"] = session.user.name || "";
+                headers["x-user-image"] = session.user.image || "";
+            }
+
+            const response = await fetch(endpoint, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ jobRole, company }),
+                headers,
+                body: JSON.stringify({
+                    jobRole,
+                    company,
+                    userId: session?.user?.email, // Use email as userId for now
+                }),
             });
 
             if (!response.ok) {
@@ -44,6 +92,9 @@ export default function Home() {
 
             const data = await response.json();
             setQuestions(data.questions || []);
+            if (data.questionSetId) {
+                setSavedQuestionSetId(data.questionSetId);
+            }
             setCurrentStep("questions");
         } catch (err) {
             setError("Failed to generate questions. Please try again.");
@@ -71,13 +122,14 @@ export default function Home() {
         setError("");
 
         try {
-            const response = await fetch("/api/generate-feedback", {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+            const response = await fetch(`${backendUrl}/api/generate-feedback`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    question: questions[currentQuestionIndex],
+                    question: questions[currentQuestionIndex]?.question,
                     answer: currentAnswer,
                 }),
             });
@@ -247,8 +299,8 @@ export default function Home() {
                             </div>
 
                             <div className="space-y-4 max-w-4xl mx-auto">
-                                {questions.map((question, index) => (
-                                    <div key={index} className="card">
+                                {questions.map((questionObj, index) => (
+                                    <div key={questionObj.id || index} className="card">
                                         <div className="flex items-start space-x-4">
                                             <div
                                                 className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white"
@@ -257,11 +309,19 @@ export default function Home() {
                                                 {index + 1}
                                             </div>
                                             <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                                                        {questionObj.type}
+                                                    </span>
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                                                        {questionObj.difficulty}
+                                                    </span>
+                                                </div>
                                                 <p
                                                     className="text-lg leading-relaxed"
                                                     style={{ color: "var(--foreground)" }}
                                                 >
-                                                    {question}
+                                                    {questionObj.question}
                                                 </p>
                                             </div>
                                         </div>
@@ -314,7 +374,7 @@ export default function Home() {
                                             </span>
                                             <br />
                                             <br />
-                                            {questions[currentQuestionIndex]}
+                                            {questions[currentQuestionIndex]?.question}
                                         </h3>
                                     </div>
                                     <div className="relative">

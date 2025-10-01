@@ -294,6 +294,55 @@ textarea::placeholder {
     animation: spin 1s linear infinite;
 }
 
+/* Dropdown animation styles */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeIn 200ms ease-out forwards;
+}
+
+.fade-in-0 {
+    animation: fadeIn 200ms ease-out;
+}
+
+.zoom-in-95 {
+    animation: fadeIn 200ms ease-out;
+}
+
+/* User menu specific styles */
+.user-menu-dropdown {
+    animation: slideIn 200ms ease-out;
+    transform-origin: top right;
+}
+
+.user-menu-item {
+    transition: all 150ms ease-in-out;
+}
+
+.user-menu-item:hover {
+    transform: translateX(2px);
+}
+
 /* Responsive spacing for mobile */
 @media (max-width: 768px) {
     .card {
@@ -303,5 +352,11 @@ textarea::placeholder {
 
     .question-item {
         padding: 1rem 0;
+    }
+
+    /* Mobile user menu adjustments */
+    .user-menu-dropdown {
+        width: 280px;
+        right: -1rem;
     }
 }
