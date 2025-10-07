@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import UserMenu from "@/components/UserMenu";
 
@@ -30,6 +30,32 @@ export default function Home() {
     const [feedback, setFeedback] = useState("");
     const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
     const [showFeedback, setShowFeedback] = useState(false);
+    const [followUpQuestion, setFollowUpQuestion] = useState("");
+    const [isFetchingFollowUp, setIsFetchingFollowUp] = useState(false);
+    const [timer, setTimer] = useState(0);
+    const [timerIntervalId, setTimerIntervalId] = useState<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (currentStep === 'mock' && !showFeedback) {
+            const intervalId = setInterval(() => {
+                setTimer(prevTimer => prevTimer + 1);
+            }, 1000);
+            setTimerIntervalId(intervalId);
+
+            return () => {
+                if (intervalId) clearInterval(intervalId);
+            };
+        } else if (timerIntervalId) {
+            clearInterval(timerIntervalId);
+            setTimerIntervalId(null);
+        }
+    }, [currentStep, currentQuestionIndex, showFeedback]);
+
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
 
     const handleGenerateQuestions = async () => {
         if (!jobRole.trim() || !company.trim()) {
@@ -110,12 +136,49 @@ export default function Home() {
         setCurrentAnswer("");
         setFeedback("");
         setShowFeedback(false);
+        setTimer(0);
+    };
+
+    const requestFollowUp = async () => {
+        setIsFetchingFollowUp(true);
+        setFollowUpQuestion("");
+        try {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+            const response = await fetch(`${backendUrl}/api/generate-follow-up`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    originalQuestion: questions[currentQuestionIndex]?.question,
+                    answer: currentAnswer,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to get follow-up question");
+            }
+
+            const data = await response.json();
+            setFollowUpQuestion(data.followUpQuestion);
+        } catch (err) {
+            console.error("Error fetching follow-up:", err);
+            setFollowUpQuestion(
+                "Sorry, I couldn't generate a follow-up. Please proceed to the next question."
+            );
+        } finally {
+            setIsFetchingFollowUp(false);
+        }
     };
 
     const submitAnswer = async () => {
         if (!currentAnswer.trim()) {
             setError("Please provide an answer before submitting");
             return;
+        }
+
+        if (timerIntervalId) {
+            clearInterval(timerIntervalId);
         }
 
         setIsSubmittingAnswer(true);
@@ -131,6 +194,7 @@ export default function Home() {
                 body: JSON.stringify({
                     question: questions[currentQuestionIndex]?.question,
                     answer: currentAnswer,
+                    timeSpent: timer, // Send time spent
                 }),
             });
 
@@ -155,7 +219,9 @@ export default function Home() {
             setCurrentAnswer("");
             setFeedback("");
             setShowFeedback(false);
+            setFollowUpQuestion("");
             setError("");
+            setTimer(0);
         } else {
             // Interview complete
             setCurrentStep("complete");
@@ -172,6 +238,8 @@ export default function Home() {
         setCurrentAnswer("");
         setFeedback("");
         setShowFeedback(false);
+        setFollowUpQuestion("");
+        setTimer(0);
     };
 
     return (
@@ -350,13 +418,18 @@ export default function Home() {
                                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                                     Question {currentQuestionIndex + 1} of {questions.length}
                                 </p>
-                                <button
-                                    onClick={resetToHome}
-                                    className="text-sm hover:underline"
-                                    style={{ color: "var(--text-secondary)" }}
-                                >
-                                    End Mock
-                                </button>
+                                <div className="flex items-center gap-4">
+                                    <p className="text-lg font-mono" style={{ color: "var(--accent)" }}>
+                                        {formatTime(timer)}
+                                    </p>
+                                    <button
+                                        onClick={resetToHome}
+                                        className="text-sm hover:underline"
+                                        style={{ color: "var(--text-secondary)" }}
+                                    >
+                                        End Mock
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="card">
@@ -441,14 +514,45 @@ export default function Home() {
                                         </p>
                                     </div>
 
-                                    <button
-                                        onClick={nextQuestion}
-                                        className="btn-primary w-full py-4"
-                                    >
-                                        {currentQuestionIndex < questions.length - 1
-                                            ? `Next Question →`
-                                            : "Complete Interview ✓"}
-                                    </button>
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <button
+                                            onClick={requestFollowUp}
+                                            disabled={isFetchingFollowUp}
+                                            className="btn-secondary w-full py-4"
+                                        >
+                                            {isFetchingFollowUp
+                                                ? "Getting Follow-up..."
+                                                : "Request Follow-up"}
+                                        </button>
+                                        <button
+                                            onClick={nextQuestion}
+                                            className="btn-primary w-full py-4"
+                                        >
+                                            {currentQuestionIndex < questions.length - 1
+                                                ? `Next Question →`
+                                                : "Complete Interview ✓"}
+                                        </button>
+                                    </div>
+
+                                    {followUpQuestion && (
+                                        <div
+                                            className="card animate-fadeIn"
+                                            style={{ backgroundColor: "var(--muted)" }}
+                                        >
+                                            <h4
+                                                className="font-medium mb-4 text-sm uppercase tracking-wide"
+                                                style={{ color: "var(--text-secondary)" }}
+                                            >
+                                                Follow-up Question:
+                                            </h4>
+                                            <p
+                                                className="leading-relaxed text-base"
+                                                style={{ color: "var(--foreground)" }}
+                                            >
+                                                {followUpQuestion}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
