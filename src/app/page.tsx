@@ -36,9 +36,9 @@ export default function Home() {
     const [timerIntervalId, setTimerIntervalId] = useState<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        if (currentStep === 'mock' && !showFeedback) {
+        if (currentStep === "mock" && !showFeedback) {
             const intervalId = setInterval(() => {
-                setTimer(prevTimer => prevTimer + 1);
+                setTimer((prevTimer) => prevTimer + 1);
             }, 1000);
             setTimerIntervalId(intervalId);
 
@@ -49,12 +49,14 @@ export default function Home() {
             clearInterval(timerIntervalId);
             setTimerIntervalId(null);
         }
-    }, [currentStep, currentQuestionIndex, showFeedback]);
+    }, [currentStep, currentQuestionIndex, showFeedback, timerIntervalId]);
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+            .toString()
+            .padStart(2, "0")}`;
     };
 
     const handleGenerateQuestions = async () => {
@@ -419,7 +421,10 @@ export default function Home() {
                                     Question {currentQuestionIndex + 1} of {questions.length}
                                 </p>
                                 <div className="flex items-center gap-4">
-                                    <p className="text-lg font-mono" style={{ color: "var(--accent)" }}>
+                                    <p
+                                        className="text-lg font-mono"
+                                        style={{ color: "var(--accent)" }}
+                                    >
                                         {formatTime(timer)}
                                     </p>
                                     <button

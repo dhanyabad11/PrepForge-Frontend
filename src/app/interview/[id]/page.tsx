@@ -11,6 +11,7 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
+    Legend,
     ResponsiveContainer,
     RadarChart,
     PolarGrid,
@@ -31,6 +32,7 @@ interface Answer {
     strengths: string[] | null;
     improvements: string[] | null;
     createdAt: string;
+    timeSpent: number | null;
 }
 
 interface InterviewDetails {
@@ -63,9 +65,9 @@ const StatCard = ({
     </div>
 );
 
-const InterviewDetailPage = () => {
+export default function InterviewDetails() {
     const { id } = useParams();
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const [details, setDetails] = useState<InterviewDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -87,8 +89,10 @@ const InterviewDetailPage = () => {
             } else {
                 throw new Error(data.message || "Could not retrieve details.");
             }
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : "Failed to load interview details";
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -219,10 +223,19 @@ const InterviewDetailPage = () => {
                 <div className="space-y-6">
                     {answers.map((ans, index) => (
                         <div key={ans.id} className="bg-white p-6 rounded-lg shadow-sm">
-                            <h3 className="font-bold text-lg text-gray-900 mb-2">
-                                Q{index + 1}: {ans.question}
-                            </h3>
-                            <p className="text-gray-700 mb-4 italic">Your answer: "{ans.answer}"</p>
+                            <div className="flex justify-between items-start">
+                                <h3 className="font-bold text-lg text-gray-900 mb-2">
+                                    Q{index + 1}: {ans.question}
+                                </h3>
+                                {ans.timeSpent && (
+                                    <span className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+                                        {Math.floor(ans.timeSpent / 60)}m {ans.timeSpent % 60}s
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-gray-700 mb-4 italic">
+                                Your answer: &quot;{ans.answer}&quot;
+                            </p>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-4">
                                 <StatCard
                                     title="Relevance"
@@ -259,6 +272,4 @@ const InterviewDetailPage = () => {
             </div>
         </div>
     );
-};
-
-export default InterviewDetailPage;
+}
