@@ -16,6 +16,7 @@ export default function Home() {
     const { data: session } = useSession();
     const [jobRole, setJobRole] = useState("");
     const [company, setCompany] = useState("");
+    const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -110,6 +111,7 @@ export default function Home() {
                 body: JSON.stringify({
                     jobRole,
                     company,
+                    difficulty,
                     userId: session?.user?.email, // Use email as userId for now
                 }),
             });
@@ -325,6 +327,33 @@ export default function Home() {
                                                 (e.target.style.borderBottomColor = "var(--border)")
                                             }
                                         />
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <label
+                                            className="block text-sm font-medium"
+                                            style={{ color: "var(--text-secondary)" }}
+                                        >
+                                            Difficulty Level 🎯
+                                        </label>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {(["easy", "medium", "hard"] as const).map((level) => (
+                                                <button
+                                                    key={level}
+                                                    type="button"
+                                                    onClick={() => setDifficulty(level)}
+                                                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
+                                                        difficulty === level
+                                                            ? "bg-blue-600 text-white scale-105"
+                                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                    }`}
+                                                >
+                                                    {level === "easy" && "😊 Easy"}
+                                                    {level === "medium" && "💪 Medium"}
+                                                    {level === "hard" && "🔥 Hard"}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     <div className="pt-6">

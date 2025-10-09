@@ -162,11 +162,19 @@ export default function Dashboard() {
 
     return (
         <div className="p-4 sm:p-8 bg-gray-50 min-h-screen font-sans">
-            <header className="mb-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">Your Dashboard</h1>
-                <p className="text-md text-gray-600 mt-1">
-                    Welcome back, {session?.user?.name || "User"}!
-                </p>
+            <header className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">Your Dashboard</h1>
+                    <p className="text-md text-gray-600 mt-1">
+                        Welcome back, {session?.user?.name || "User"}!
+                    </p>
+                </div>
+                <Link
+                    href="/analytics"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors font-medium"
+                >
+                    📈 View Analytics
+                </Link>
             </header>
 
             {/* Stats Overview */}
