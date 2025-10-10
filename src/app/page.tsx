@@ -17,6 +17,11 @@ export default function Home() {
     const [jobRole, setJobRole] = useState("");
     const [company, setCompany] = useState("");
     const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
+    const [seniority, setSeniority] = useState<string>("mid-level");
+    const [numberOfQuestions, setNumberOfQuestions] = useState<number>(5);
+    const [questionType, setQuestionType] = useState<
+        "behavioral" | "technical" | "situational" | "all"
+    >("all");
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -112,6 +117,9 @@ export default function Home() {
                     jobRole,
                     company,
                     difficulty,
+                    experience: seniority,
+                    numberOfQuestions,
+                    questionType,
                     userId: session?.user?.email, // Use email as userId for now
                 }),
             });
@@ -334,6 +342,33 @@ export default function Home() {
                                             className="block text-sm font-medium"
                                             style={{ color: "var(--text-secondary)" }}
                                         >
+                                            Seniority Level (Optional) 🎓
+                                        </label>
+                                        <select
+                                            value={seniority}
+                                            onChange={(e) => setSeniority(e.target.value)}
+                                            className="w-full text-lg bg-white border-2 rounded-lg px-4 py-3"
+                                            style={{
+                                                borderColor: "var(--border)",
+                                                color: "var(--foreground)",
+                                            }}
+                                        >
+                                            <option value="junior">🌱 Junior (0-2 years)</option>
+                                            <option value="mid-level">
+                                                💼 Mid-Level (3-5 years)
+                                            </option>
+                                            <option value="senior">🎯 Senior (6-10 years)</option>
+                                            <option value="lead">
+                                                👑 Lead/Principal (10+ years)
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <label
+                                            className="block text-sm font-medium"
+                                            style={{ color: "var(--text-secondary)" }}
+                                        >
                                             Difficulty Level 🎯
                                         </label>
                                         <div className="grid grid-cols-3 gap-3">
@@ -351,6 +386,62 @@ export default function Home() {
                                                     {level === "easy" && "😊 Easy"}
                                                     {level === "medium" && "💪 Medium"}
                                                     {level === "hard" && "🔥 Hard"}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <label
+                                            className="block text-sm font-medium"
+                                            style={{ color: "var(--text-secondary)" }}
+                                        >
+                                            Question Type (Optional) 📋
+                                        </label>
+                                        <select
+                                            value={questionType}
+                                            onChange={(e) =>
+                                                setQuestionType(
+                                                    e.target.value as
+                                                        | "behavioral"
+                                                        | "technical"
+                                                        | "situational"
+                                                        | "all"
+                                                )
+                                            }
+                                            className="w-full text-lg bg-white border-2 rounded-lg px-4 py-3"
+                                            style={{
+                                                borderColor: "var(--border)",
+                                                color: "var(--foreground)",
+                                            }}
+                                        >
+                                            <option value="all">🎯 All Types</option>
+                                            <option value="behavioral">💬 Behavioral Only</option>
+                                            <option value="technical">⚙️ Technical Only</option>
+                                            <option value="situational">🎭 Situational Only</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <label
+                                            className="block text-sm font-medium"
+                                            style={{ color: "var(--text-secondary)" }}
+                                        >
+                                            Number of Questions 🔢
+                                        </label>
+                                        <div className="grid grid-cols-4 gap-3">
+                                            {[5, 10, 15, 20].map((num) => (
+                                                <button
+                                                    key={num}
+                                                    type="button"
+                                                    onClick={() => setNumberOfQuestions(num)}
+                                                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
+                                                        numberOfQuestions === num
+                                                            ? "bg-blue-600 text-white scale-105"
+                                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                    }`}
+                                                >
+                                                    {num}
                                                 </button>
                                             ))}
                                         </div>
