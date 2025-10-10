@@ -3,6 +3,15 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import UserMenu from "@/components/UserMenu";
+import {
+    Briefcase,
+    Building2,
+    GraduationCap,
+    Target,
+    ListChecks,
+    Hash,
+    Sparkles,
+} from "lucide-react";
 
 interface Question {
     id: string;
@@ -261,21 +270,21 @@ export default function Home() {
                 <UserMenu />
             </div>
 
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="w-full max-w-4xl mx-auto">
+            <div className="min-h-screen flex items-center justify-center p-6">
+                <div className="w-full max-w-6xl mx-auto">
                     {/* Input Screen */}
                     {currentStep === "input" && (
                         <div className="min-h-screen flex flex-col justify-center items-center px-4 animate-fadeIn">
                             {/* Header */}
-                            <div className="text-center space-y-6 mb-12">
+                            <div className="text-center space-y-6 mb-16">
                                 <h1
-                                    className="text-6xl font-bold"
+                                    className="text-7xl font-bold"
                                     style={{ color: "var(--foreground)" }}
                                 >
                                     PrepForge
                                 </h1>
                                 <p
-                                    className="text-xl font-light"
+                                    className="text-2xl font-light"
                                     style={{ color: "var(--text-secondary)" }}
                                 >
                                     Generate personalized questions and practice with AI feedback
@@ -283,195 +292,222 @@ export default function Home() {
                             </div>
 
                             {/* Input Form - Card with Pure White Background (60% rule) */}
-                            <div className="card w-full max-w-lg">
-                                <div className="space-y-8">
-                                    <div className="space-y-3">
-                                        <label
-                                            className="block text-sm font-medium"
-                                            style={{ color: "var(--text-secondary)" }}
-                                        >
-                                            Job Role
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g., Software Engineer"
-                                            value={jobRole}
-                                            onChange={(e) => setJobRole(e.target.value)}
-                                            className="w-full text-lg bg-transparent border-0 border-b-2 px-0 py-3"
-                                            style={{
-                                                borderBottomColor: "var(--border)",
-                                                color: "var(--foreground)",
-                                            }}
-                                            onFocus={(e) =>
-                                                (e.target.style.borderBottomColor = "var(--accent)")
-                                            }
-                                            onBlur={(e) =>
-                                                (e.target.style.borderBottomColor = "var(--border)")
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label
-                                            className="block text-sm font-medium"
-                                            style={{ color: "var(--text-secondary)" }}
-                                        >
-                                            Company
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g., Google"
-                                            value={company}
-                                            onChange={(e) => setCompany(e.target.value)}
-                                            className="w-full text-lg bg-transparent border-0 border-b-2 px-0 py-3"
-                                            style={{
-                                                borderBottomColor: "var(--border)",
-                                                color: "var(--foreground)",
-                                            }}
-                                            onFocus={(e) =>
-                                                (e.target.style.borderBottomColor = "var(--accent)")
-                                            }
-                                            onBlur={(e) =>
-                                                (e.target.style.borderBottomColor = "var(--border)")
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label
-                                            className="block text-sm font-medium"
-                                            style={{ color: "var(--text-secondary)" }}
-                                        >
-                                            Seniority Level (Optional) 🎓
-                                        </label>
-                                        <select
-                                            value={seniority}
-                                            onChange={(e) => setSeniority(e.target.value)}
-                                            className="w-full text-lg bg-white border-2 rounded-lg px-4 py-3"
-                                            style={{
-                                                borderColor: "var(--border)",
-                                                color: "var(--foreground)",
-                                            }}
-                                        >
-                                            <option value="junior">🌱 Junior (0-2 years)</option>
-                                            <option value="mid-level">
-                                                💼 Mid-Level (3-5 years)
-                                            </option>
-                                            <option value="senior">🎯 Senior (6-10 years)</option>
-                                            <option value="lead">
-                                                👑 Lead/Principal (10+ years)
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label
-                                            className="block text-sm font-medium"
-                                            style={{ color: "var(--text-secondary)" }}
-                                        >
-                                            Difficulty Level 🎯
-                                        </label>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            {(["easy", "medium", "hard"] as const).map((level) => (
-                                                <button
-                                                    key={level}
-                                                    type="button"
-                                                    onClick={() => setDifficulty(level)}
-                                                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
-                                                        difficulty === level
-                                                            ? "bg-blue-600 text-white scale-105"
-                                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                                    }`}
-                                                >
-                                                    {level === "easy" && "😊 Easy"}
-                                                    {level === "medium" && "💪 Medium"}
-                                                    {level === "hard" && "🔥 Hard"}
-                                                </button>
-                                            ))}
+                            <div className="card w-full max-w-4xl">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* Left Column */}
+                                    <div className="space-y-8">
+                                        <div className="space-y-3">
+                                            <label
+                                                className="flex items-center gap-2 text-base font-medium"
+                                                style={{ color: "var(--text-secondary)" }}
+                                            >
+                                                <Briefcase size={20} />
+                                                Job Role
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="e.g., Software Engineer"
+                                                value={jobRole}
+                                                onChange={(e) => setJobRole(e.target.value)}
+                                                className="w-full text-lg bg-transparent border-0 border-b-2 px-0 py-3"
+                                                style={{
+                                                    borderBottomColor: "var(--border)",
+                                                    color: "var(--foreground)",
+                                                }}
+                                                onFocus={(e) =>
+                                                    (e.target.style.borderBottomColor =
+                                                        "var(--accent)")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.target.style.borderBottomColor =
+                                                        "var(--border)")
+                                                }
+                                            />
                                         </div>
-                                    </div>
 
-                                    <div className="space-y-3">
-                                        <label
-                                            className="block text-sm font-medium"
-                                            style={{ color: "var(--text-secondary)" }}
-                                        >
-                                            Question Type (Optional) 📋
-                                        </label>
-                                        <select
-                                            value={questionType}
-                                            onChange={(e) =>
-                                                setQuestionType(
-                                                    e.target.value as
-                                                        | "behavioral"
-                                                        | "technical"
-                                                        | "situational"
-                                                        | "all"
-                                                )
-                                            }
-                                            className="w-full text-lg bg-white border-2 rounded-lg px-4 py-3"
-                                            style={{
-                                                borderColor: "var(--border)",
-                                                color: "var(--foreground)",
-                                            }}
-                                        >
-                                            <option value="all">🎯 All Types</option>
-                                            <option value="behavioral">💬 Behavioral Only</option>
-                                            <option value="technical">⚙️ Technical Only</option>
-                                            <option value="situational">🎭 Situational Only</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label
-                                            className="block text-sm font-medium"
-                                            style={{ color: "var(--text-secondary)" }}
-                                        >
-                                            Number of Questions 🔢
-                                        </label>
-                                        <div className="grid grid-cols-4 gap-3">
-                                            {[5, 10, 15, 20].map((num) => (
-                                                <button
-                                                    key={num}
-                                                    type="button"
-                                                    onClick={() => setNumberOfQuestions(num)}
-                                                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
-                                                        numberOfQuestions === num
-                                                            ? "bg-blue-600 text-white scale-105"
-                                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                                    }`}
-                                                >
-                                                    {num}
-                                                </button>
-                                            ))}
+                                        <div className="space-y-3">
+                                            <label
+                                                className="flex items-center gap-2 text-base font-medium"
+                                                style={{ color: "var(--text-secondary)" }}
+                                            >
+                                                <Building2 size={20} />
+                                                Company
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="e.g., Google"
+                                                value={company}
+                                                onChange={(e) => setCompany(e.target.value)}
+                                                className="w-full text-lg bg-transparent border-0 border-b-2 px-0 py-3"
+                                                style={{
+                                                    borderBottomColor: "var(--border)",
+                                                    color: "var(--foreground)",
+                                                }}
+                                                onFocus={(e) =>
+                                                    (e.target.style.borderBottomColor =
+                                                        "var(--accent)")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.target.style.borderBottomColor =
+                                                        "var(--border)")
+                                                }
+                                            />
                                         </div>
-                                    </div>
 
-                                    <div className="pt-6">
-                                        <button
-                                            onClick={handleGenerateQuestions}
-                                            disabled={
-                                                isLoading || !jobRole.trim() || !company.trim()
-                                            }
-                                            className="btn-primary w-full text-lg py-4"
-                                        >
-                                            {isLoading ? (
-                                                <span className="flex items-center justify-center space-x-2">
-                                                    <div className="loading-spinner"></div>
-                                                    <span>Generating Questions...</span>
+                                        <div className="space-y-3">
+                                            <label
+                                                className="flex items-center gap-2 text-base font-medium"
+                                                style={{ color: "var(--text-secondary)" }}
+                                            >
+                                                <GraduationCap size={20} />
+                                                Seniority Level{" "}
+                                                <span className="text-sm opacity-60">
+                                                    (Optional)
                                                 </span>
-                                            ) : (
-                                                "Generate Questions"
-                                            )}
-                                        </button>
+                                            </label>
+                                            <select
+                                                value={seniority}
+                                                onChange={(e) => setSeniority(e.target.value)}
+                                                className="w-full text-base bg-white border-2 rounded-lg px-4 py-3 cursor-pointer"
+                                                style={{
+                                                    borderColor: "var(--border)",
+                                                    color: "var(--foreground)",
+                                                }}
+                                            >
+                                                <option value="junior">Junior (0-2 years)</option>
+                                                <option value="mid-level">
+                                                    Mid-Level (3-5 years)
+                                                </option>
+                                                <option value="senior">Senior (6-10 years)</option>
+                                                <option value="lead">
+                                                    Lead/Principal (10+ years)
+                                                </option>
+                                            </select>
+                                        </div>
                                     </div>
 
-                                    {error && (
-                                        <p className="text-red-500 text-sm text-center transition-all duration-300">
-                                            {error}
-                                        </p>
-                                    )}
+                                    {/* Right Column */}
+                                    <div className="space-y-8">
+                                        <div className="space-y-3">
+                                            <label
+                                                className="flex items-center gap-2 text-base font-medium"
+                                                style={{ color: "var(--text-secondary)" }}
+                                            >
+                                                <Target size={20} />
+                                                Difficulty Level
+                                            </label>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {(["easy", "medium", "hard"] as const).map(
+                                                    (level) => (
+                                                        <button
+                                                            key={level}
+                                                            type="button"
+                                                            onClick={() => setDifficulty(level)}
+                                                            className={`py-3 px-4 rounded-lg font-medium transition-all ${
+                                                                difficulty === level
+                                                                    ? "bg-blue-600 text-white scale-105"
+                                                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                            }`}
+                                                        >
+                                                            {level.charAt(0).toUpperCase() +
+                                                                level.slice(1)}
+                                                        </button>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label
+                                                className="flex items-center gap-2 text-base font-medium"
+                                                style={{ color: "var(--text-secondary)" }}
+                                            >
+                                                <ListChecks size={20} />
+                                                Question Type{" "}
+                                                <span className="text-sm opacity-60">
+                                                    (Optional)
+                                                </span>
+                                            </label>
+                                            <select
+                                                value={questionType}
+                                                onChange={(e) =>
+                                                    setQuestionType(
+                                                        e.target.value as
+                                                            | "behavioral"
+                                                            | "technical"
+                                                            | "situational"
+                                                            | "all"
+                                                    )
+                                                }
+                                                className="w-full text-base bg-white border-2 rounded-lg px-4 py-3 cursor-pointer"
+                                                style={{
+                                                    borderColor: "var(--border)",
+                                                    color: "var(--foreground)",
+                                                }}
+                                            >
+                                                <option value="all">All Types</option>
+                                                <option value="behavioral">Behavioral Only</option>
+                                                <option value="technical">Technical Only</option>
+                                                <option value="situational">
+                                                    Situational Only
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label
+                                                className="flex items-center gap-2 text-base font-medium"
+                                                style={{ color: "var(--text-secondary)" }}
+                                            >
+                                                <Hash size={20} />
+                                                Number of Questions
+                                            </label>
+                                            <div className="grid grid-cols-4 gap-3">
+                                                {[5, 10, 15, 20].map((num) => (
+                                                    <button
+                                                        key={num}
+                                                        type="button"
+                                                        onClick={() => setNumberOfQuestions(num)}
+                                                        className={`py-3 px-4 rounded-lg font-medium transition-all ${
+                                                            numberOfQuestions === num
+                                                                ? "bg-blue-600 text-white scale-105"
+                                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                        }`}
+                                                    >
+                                                        {num}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                {/* Generate Button */}
+                                <div className="mt-10">
+                                    <button
+                                        onClick={handleGenerateQuestions}
+                                        disabled={isLoading || !jobRole.trim() || !company.trim()}
+                                        className="btn-primary w-full text-lg py-4 flex items-center justify-center gap-2"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <div className="loading-spinner"></div>
+                                                <span>Generating Questions...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles size={20} />
+                                                <span>Generate Questions</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                {error && (
+                                    <p className="text-red-500 text-sm text-center mt-4 transition-all duration-300">
+                                        {error}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     )}

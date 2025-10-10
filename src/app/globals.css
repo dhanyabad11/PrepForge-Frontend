@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
     /* Minimalist Color Palette - Neutral Gray with Soft Blue Accent (60-30-10 Rule) */
@@ -222,10 +224,15 @@ textarea::placeholder {
 /* Card styles for content areas */
 .card {
     background: var(--background-pure);
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: var(--shadow-subtle);
+    border-radius: 1.5rem;
+    padding: 3rem;
+    box-shadow: 0 4px 12px var(--shadow-subtle), 0 2px 4px var(--shadow-subtle);
     border: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px var(--shadow-soft), 0 4px 8px var(--shadow-subtle);
 }
 
 /* Minimalist question list styling */
