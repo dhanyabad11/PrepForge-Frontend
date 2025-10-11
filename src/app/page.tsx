@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import UserMenu from "@/components/UserMenu";
 import {
@@ -48,23 +48,25 @@ export default function Home() {
     const [followUpQuestion, setFollowUpQuestion] = useState("");
     const [isFetchingFollowUp, setIsFetchingFollowUp] = useState(false);
     const [timer, setTimer] = useState(0);
-    const [timerIntervalId, setTimerIntervalId] = useState<NodeJS.Timeout | null>(null);
+    const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         if (currentStep === "mock" && !showFeedback) {
             const intervalId = setInterval(() => {
                 setTimer((prevTimer) => prevTimer + 1);
             }, 1000);
-            setTimerIntervalId(intervalId);
+            timerIntervalRef.current = intervalId;
 
             return () => {
                 if (intervalId) clearInterval(intervalId);
             };
-        } else if (timerIntervalId) {
-            clearInterval(timerIntervalId);
-            setTimerIntervalId(null);
+        } else {
+            if (timerIntervalRef.current) {
+                clearInterval(timerIntervalRef.current);
+                timerIntervalRef.current = null;
+            }
         }
-    }, [currentStep, currentQuestionIndex, showFeedback, timerIntervalId]);
+    }, [currentStep, currentQuestionIndex, showFeedback]);
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
@@ -198,8 +200,8 @@ export default function Home() {
             return;
         }
 
-        if (timerIntervalId) {
-            clearInterval(timerIntervalId);
+        if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
         }
 
         setIsSubmittingAnswer(true);
