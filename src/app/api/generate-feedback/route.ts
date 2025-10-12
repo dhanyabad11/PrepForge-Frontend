@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Call the backend API
-        const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
+        // Call the backend API - use NEXT_PUBLIC_API_URL for production
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || "http://localhost:5000";
         const response = await fetch(`${backendUrl}/api/generate-feedback`, {
             method: "POST",
             headers: {

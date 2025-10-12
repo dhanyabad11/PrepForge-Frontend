@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
     try {
-        const { jobRole, company } = await request.json();
+        const { jobRole, company, experience, difficulty, numberOfQuestions, questionType } = await request.json();
 
         if (!jobRole || !company) {
             return NextResponse.json(
@@ -11,14 +13,26 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Get session to extract userId
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.email || "anonymous";
+
         // Call the backend API
-        const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || "http://localhost:5000";
         const response = await fetch(`${backendUrl}/api/generate-questions`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ jobRole, company }),
+            body: JSON.stringify({ 
+                jobRole, 
+                company, 
+                userId,
+                experience: experience || "mid-level",
+                difficulty: difficulty || "medium",
+                numberOfQuestions: numberOfQuestions || 5,
+                questionType: questionType || "all"
+            }),
         });
 
         if (!response.ok) {
