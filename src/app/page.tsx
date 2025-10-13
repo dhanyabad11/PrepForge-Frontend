@@ -132,7 +132,7 @@ export default function Home() {
                     experience: seniority,
                     numberOfQuestions,
                     questionType,
-                    userId: session?.user?.email, // Use email as userId for now
+                    userId: session?.user?.email || "anonymous", // Use email as userId or "anonymous"
                 }),
             });
 
