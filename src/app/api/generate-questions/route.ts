@@ -4,7 +4,8 @@ import { authOptions } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
     try {
-        const { jobRole, company, experience, difficulty, numberOfQuestions, questionType } = await request.json();
+        const { jobRole, company, experience, difficulty, numberOfQuestions, questionType } =
+            await request.json();
 
         if (!jobRole || !company) {
             return NextResponse.json(
@@ -18,31 +19,40 @@ export async function POST(request: NextRequest) {
         const userId = session?.user?.email || "anonymous";
 
         // Call the backend API
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || "http://localhost:5000";
+        const backendUrl =
+            process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || "http://localhost:5000";
         const response = await fetch(`${backendUrl}/api/generate-questions`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ 
-                jobRole, 
-                company, 
+            body: JSON.stringify({
+                jobRole,
+                company,
                 userId,
                 experience: experience || "mid-level",
                 difficulty: difficulty || "medium",
                 numberOfQuestions: numberOfQuestions || 5,
-                questionType: questionType || "all"
+                questionType: questionType || "all",
             }),
         });
 
         if (!response.ok) {
-            throw new Error("Backend API call failed");
+            const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+            console.error("Backend error:", response.status, errorData);
+            return NextResponse.json(
+                { error: errorData.error || "Backend API call failed", details: errorData },
+                { status: response.status }
+            );
         }
 
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {
         console.error("Error generating questions:", error);
-        return NextResponse.json({ error: "Failed to generate questions" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Failed to generate questions", details: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
     }
 }
