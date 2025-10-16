@@ -16,7 +16,7 @@ _Interactive interview session with AI-generated questions and real-time feedbac
 
 ### Questions
 
-![questions](public/screenshots/analytics.png)
+![questions](public/screenshots/questions.png)
 _Detailed analytics tracking your performance and progress over time_
 
 ## ✨ Features
