@@ -64,7 +64,14 @@ export function useVoiceRecording(options: UseVoiceRecordingOptions = {}) {
 
                 // Auto-stop at max duration
                 if (elapsed >= maxDuration) {
-                    stopRecording();
+                    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+                        mediaRecorderRef.current.stop();
+                        setIsRecording(false);
+                        setIsPaused(false);
+                        if (timerRef.current) {
+                            clearInterval(timerRef.current);
+                        }
+                    }
                     toast.error(`Maximum recording duration (${maxDuration}s) reached`);
                 }
             }, 100);

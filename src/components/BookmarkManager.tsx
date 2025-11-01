@@ -3,11 +3,19 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
+interface Question {
+    id: string;
+    question: string;
+    type: string;
+    difficulty: string;
+    category: string;
+}
+
 interface SavedQuestionSet {
     id: number;
     title: string;
     description: string | null;
-    questions: any[];
+    questions: Question[];
     tags: string[];
     isFavorite: boolean;
     practiceCount: number;
@@ -24,11 +32,6 @@ export function BookmarkManager({ userId, apiUrl = "http://localhost:5000" }: Bo
     const [loading, setLoading] = useState(true);
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
     const [tags, setTags] = useState<string[]>([]);
-
-    useEffect(() => {
-        fetchBookmarks();
-        fetchTags();
-    }, [userId, selectedTag]);
 
     const fetchBookmarks = async () => {
         try {
@@ -63,6 +66,12 @@ export function BookmarkManager({ userId, apiUrl = "http://localhost:5000" }: Bo
         }
     };
 
+    useEffect(() => {
+        fetchBookmarks();
+        fetchTags();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userId, selectedTag]);
+
     const toggleFavorite = async (setId: number) => {
         try {
             const response = await fetch(`${apiUrl}/api/bookmarks/${setId}/favorite`, {
@@ -79,7 +88,7 @@ export function BookmarkManager({ userId, apiUrl = "http://localhost:5000" }: Bo
                 );
                 toast.success(data.data.isFavorite ? "Added to favorites" : "Removed from favorites");
             }
-        } catch (error) {
+        } catch {
             toast.error("Failed to update favorite");
         }
     };
@@ -100,7 +109,7 @@ export function BookmarkManager({ userId, apiUrl = "http://localhost:5000" }: Bo
                 setBookmarks((prev) => prev.filter((b) => b.id !== setId));
                 toast.success("Question set deleted");
             }
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete question set");
         }
     };

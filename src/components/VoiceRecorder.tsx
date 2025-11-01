@@ -1,7 +1,6 @@
 "use client";
 
 import { useVoiceRecording } from "@/hooks/useVoiceRecording";
-import { useState } from "react";
 
 interface VoiceRecorderProps {
     onRecordingComplete?: (blob: Blob, duration: number) => void;
@@ -12,7 +11,6 @@ export function VoiceRecorder({ onRecordingComplete, maxDuration = 300 }: VoiceR
     const {
         isRecording,
         isPaused,
-        recordingTime,
         audioURL,
         formattedTime,
         startRecording,
@@ -21,20 +19,6 @@ export function VoiceRecorder({ onRecordingComplete, maxDuration = 300 }: VoiceR
         stopRecording,
         resetRecording,
     } = useVoiceRecording({ onRecordingComplete, maxDuration });
-
-    const [isPlaying, setIsPlaying] = useState(false);
-
-    const handlePlayPause = () => {
-        const audio = document.getElementById("recorded-audio") as HTMLAudioElement;
-        if (audio) {
-            if (isPlaying) {
-                audio.pause();
-            } else {
-                audio.play();
-            }
-            setIsPlaying(!isPlaying);
-        }
-    };
 
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -98,7 +82,6 @@ export function VoiceRecorder({ onRecordingComplete, maxDuration = 300 }: VoiceR
                         <audio
                             id="recorded-audio"
                             src={audioURL}
-                            onEnded={() => setIsPlaying(false)}
                             className="w-full"
                             controls
                         />
