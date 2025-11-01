@@ -6,7 +6,7 @@ export function useOptimistic<T>(initialData: T) {
     const [isLoading, setIsLoading] = useState(false);
 
     const optimisticUpdate = useCallback(
-        async <R,>(
+        async <R>(
             optimisticData: T,
             action: () => Promise<R>,
             options?: {
